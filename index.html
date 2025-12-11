@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Calorie Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #fef9f5, #e5f0ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 900px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 24px 28px 28px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.22),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 780px) {
+      .app {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+    }
+
+    .app-header {
+      margin-bottom: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .title-pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.08);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      color: #1d4ed8;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    form {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .field-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    input, select {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #cbd5f1;
+      outline: none;
+      font-size: 13px;
+      transition: border 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+      background: #f9fafb;
+    }
+
+    input:focus, select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+      background: white;
+      transform: translateY(-0.5px);
+    }
+
+    .helper {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    button {
+      margin-top: 6px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow:
+        0 10px 18px rgba(37, 99, 235, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.3);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow:
+        0 14px 26px rgba(37, 99, 235, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.5);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow:
+        0 6px 12px rgba(37, 99, 235, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.5);
+    }
+
+    .sparkles {
+      font-size: 15px;
+    }
+
+    .right-panel {
+      border-radius: 18px;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      padding: 14px 14px 12px;
+      background: radial-gradient(circle at top left, #eff6ff, #fdf2ff 55%, #ffffff 80%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .result-box {
+      background: rgba(15, 23, 42, 0.95);
+      color: #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 13px;
+      box-shadow:
+        0 12px 28px rgba(15, 23, 42, 0.7),
+        0 0 0 1px rgba(148, 163, 184, 0.3);
+      margin-bottom: 6px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .result-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #a5b4fc;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.16);
+      color: #e0f2fe;
+      border: 1px solid rgba(125, 211, 252, 0.6);
+    }
+
+    .kcal-main {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .kcal-main span {
+      font-size: 12px;
+      font-weight: 500;
+      color: #9ca3af;
+      margin-left: 4px;
+    }
+
+    .goal-line {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .goal-tag {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(252, 211, 77, 0.16);
+      border: 1px solid rgba(252, 211, 77, 0.7);
+      color: #fef9c3;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-right: 6px;
+    }
+
+    .goal-value {
+      font-weight: 600;
+    }
+
+    .extra-info {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .how-box {
+      font-size: 11.5px;
+      color: #475569;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
+      padding: 8px 9px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .how-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6b21a8;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .how-box ul {
+      margin-top: 4px;
+      padding-left: 14px;
+    }
+
+    .how-box li {
+      margin-bottom: 2px;
+    }
+
+    .notice {
+      margin-top: 5px;
+      font-size: 10px;
+      color: #9ca3af;
+      text-align: right;
+    }
+
+    .error {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #b91c1c;
+    }
+
+    .section-title {
+      margin-top: 14px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6b7280;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- LEFT: FORM -->
+    <div>
+      <header class="app-header">
+        <div class="title-row">
+          <div class="title-pill">AI Mini Project</div>
+        </div>
+        <h1>AI Calorie Needs Predictor</h1>
+        <p class="subtitle">
+          Enter your details and let a tiny linear AI model estimate how many calories you need per day.
+        </p>
+      </header>
+
+      <form id="calorie-form">
+        <div class="field-group">
+          <div class="field">
+            <label for="age">Age (years)</label>
+            <input id="age" type="number" min="10" max="90" required placeholder="e.g. 21">
+          </div>
+          <div class="field">
+            <label for="gender">Gender</label>
+            <select id="gender" required>
+              <option value="male" selected>Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field">
+            <label for="height">Height (cm)</label>
+            <input id="height" type="number" min="120" max="220" required placeholder="e.g. 175">
+          </div>
+          <div class="field">
+            <label for="weight">Weight (kg)</label>
+            <input id="weight" type="number" min="35" max="180" required placeholder="e.g. 68">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="activity">Activity level</label>
+          <select id="activity" required>
+            <option value="1.2">Very light – mostly sitting, no exercise</option>
+            <option value="1.375">Light – walking sometimes, 1–2 days/week</option>
+            <option value="1.55" selected>Moderate – exercise 3–4 days/week</option>
+            <option value="1.725">Active – exercise 5–6 days/week</option>
+            <option value="1.9">Very active – intense training, physical job</option>
+          </select>
+          <div class="helper">
+            Behind the scenes, the AI multiplies your base calories with this factor.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="goal">Goal</label>
+          <select id="goal">
+            <option value="maintain" selected>Maintain weight</option>
+            <option value="lose">Lose fat</option>
+            <option value="gain">Gain muscle / weight</option>
+          </select>
+        </div>
+
+        <button type="submit">
+          <span class="sparkles">✨</span>
+          Run AI Prediction
+        </button>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- FOOD PROTEIN LOOKUP -->
+        <div class="section-title">Food Protein Lookup</div>
+
+        <div class="field">
+          <label for="food-name">Food name</label>
+          <input id="food-name" list="food-list" placeholder="e.g. egg, rice, chicken breast, paneer">
+          <datalist id="food-list">
+            <option value="egg">
+            <option value="boiled egg">
+            <option value="rice">
+            <option value="rice cooked">
+            <option value="chicken breast">
+            <option value="paneer">
+            <option value="milk">
+            <option value="dal">
+            <option value="dal cooked">
+            <option value="roti">
+            <option value="chapati">
+            <option value="banana">
+          </datalist>
+          <div class="helper">
+            Type a food from the list (e.g. "egg", "rice cooked", "roti", "paneer").
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field">
+            <label for="food-amount">Amount</label>
+            <input id="food-amount" type="number" min="1" placeholder="e.g. 1 or 100">
+          </div>
+          <div class="field">
+            <label for="food-unit">Unit</label>
+            <select id="food-unit">
+              <option value="piece">piece(s)</option>
+              <option value="g" selected>gram(s)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" id="food-btn">
+          🍳 Check Protein
+        </button>
+
+        <div id="food-error" class="error" style="display:none;"></div>
+      </form>
+    </div>
+
+    <!-- RIGHT: RESULT & EXPLANATION -->
+    <div class="right-panel">
+      <div class="result-box">
+        <div class="result-header">
+          <div class="result-title">Estimated Daily Calories</div>
+          <div class="chip" id="model-chip">Linear AI Model • v1.0</div>
+        </div>
+
+        <div class="kcal-main" id="kcal-main">
+          ---- <span>kcal / day</span>
+        </div>
+
+        <div class="goal-line" id="goal-line">
+          <span class="goal-tag">Goal</span>
+          Choose your goal on the left and run prediction.
+        </div>
+
+        <div class="extra-info" id="extra-info">
+          <div class="pill" id="pill-deficit">Fat loss range: –400 to –500 kcal</div>
+          <div class="pill" id="pill-surplus">Gain range: +300 to +400 kcal</div>
+        </div>
+      </div>
+
+      <!-- FOOD RESULT BOX -->
+      <div class="result-box" id="food-box">
+        <div class="result-header">
+          <div class="result-title">Food Protein Result</div>
+          <div class="chip">Per given amount</div>
+        </div>
+        <div class="goal-line" id="food-output-main">
+          Type a food & amount on the left, then click <strong>Check Protein</strong>.
+        </div>
+        <div class="extra-info" id="food-output-extra">
+          <div class="pill">Example: 1 egg ≈ 6 g protein</div>
+        </div>
+      </div>
+
+      <div class="how-box">
+        <div class="how-title">How this “AI” works</div>
+        <p>
+          The calculator uses a small linear model inspired by the Mifflin–St&nbsp;Jeor equation
+          (commonly used in nutrition science):
+        </p>
+        <ul>
+          <li>1️⃣ Computes a base value (BMR) using your age, height, weight & gender.</li>
+          <li>2️⃣ Multiplies it with your selected activity factor.</li>
+          <li>3️⃣ Adjusts for your goal: maintain, lose or gain weight.</li>
+        </ul>
+        <p style="margin-top: 4px;">
+          The food lookup uses a mini nutrition database (per 100g) and scales it
+          to your portion size.
+        </p>
+      </div>
+
+      <div class="notice">
+        Educational demo only – not a medical tool.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple "AI" linear model for calories.
+    // Uses the Mifflin–St Jeor style equation:
+    // BMR (male)   = 10*W + 6.25*H - 5*A + 5
+    // BMR (female) = 10*W + 6.25*H - 5*A - 161
+    // Then: calories = BMR * activity_factor
+
+    function predictCalories(age, height, weight, gender, activityFactor) {
+      let bmr;
+      if (gender === "male") {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      }
+
+      const maintenance = bmr * activityFactor;
+
+      // tiny "noise" so it feels like a model
+      const noise = (Math.random() - 0.5) * 40; // between -20 and +20
+      return maintenance + noise;
+    }
+
+    const form = document.getElementById("calorie-form");
+    const errorBox = document.getElementById("error");
+    const kcalMain = document.getElementById("kcal-main");
+    const goalLine = document.getElementById("goal-line");
+    const pillDeficit = document.getElementById("pill-deficit");
+    const pillSurplus = document.getElementById("pill-surplus");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      errorBox.style.display = "none";
+
+      const age = parseInt(document.getElementById("age").value, 10);
+      const gender = document.getElementById("gender").value;
+      const height = parseFloat(document.getElementById("height").value);
+      const weight = parseFloat(document.getElementById("weight").value);
+      const activityFactor = parseFloat(document.getElementById("activity").value);
+      const goal = document.getElementById("goal").value;
+
+      // Basic validation
+      if (isNaN(age) || isNaN(height) || isNaN(weight)) {
+        errorBox.textContent = "Please fill all numeric fields correctly.";
+        errorBox.style.display = "block";
+        return;
+      }
+      if (age < 10 || age > 90 || height < 120 || height > 220 || weight < 35 || weight > 180) {
+        errorBox.textContent = "Values seem unrealistic. Please enter a normal human range.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      const maintenance = predictCalories(age, height, weight, gender, activityFactor);
+      const roundedMaintenance = Math.round(maintenance);
+
+      // Update main calories display
+      kcalMain.innerHTML = `${roundedMaintenance} <span>kcal / day</span>`;
+
+      if (goal === "lose") {
+        const suggest = roundedMaintenance - 450;
+        const goalKcal = Math.round(suggest);
+        goalLine.innerHTML = `<span class="goal-tag">Fat Loss</span>For fat loss, try around <span class="goal-value">${goalKcal} kcal / day</span>.`;
+      } else if (goal === "gain") {
+        const suggest = roundedMaintenance + 350;
+        const goalKcal = Math.round(suggest);
+        goalLine.innerHTML = `<span class="goal-tag">Gain</span>For weight gain, try around <span class="goal-value">${goalKcal} kcal / day</span>.`;
+      } else {
+        goalLine.innerHTML =
+          `<span class="goal-tag">Maintain</span>` +
+          `Staying close to <span class="goal-value">${roundedMaintenance} kcal / day</span> should roughly maintain weight.`;
+      }
+
+      // Update extra info pills
+      pillDeficit.textContent =
+        `Fat loss range: ${Math.round(roundedMaintenance - 500)} – ${Math.round(roundedMaintenance - 400)} kcal`;
+      pillSurplus.textContent =
+        `Gain range: ${Math.round(roundedMaintenance + 300)} – ${Math.round(roundedMaintenance + 400)} kcal`;
+    });
+
+    // -------- FOOD NUTRITION LOOKUP --------
+
+    // Simple mini database: per 100g values (approximate)
+    const FOOD_DB = {
+      "egg": { proteinPer100g: 12.5, caloriesPer100g: 143, weightPerPiece: 50 },
+      "boiled egg": { proteinPer100g: 12.5, caloriesPer100g: 143, weightPerPiece: 50 },
+      "rice": { proteinPer100g: 2.7, caloriesPer100g: 130 },
+      "rice cooked": { proteinPer100g: 2.7, caloriesPer100g: 130 },
+      "chicken breast": { proteinPer100g: 31, caloriesPer100g: 165 },
+      "paneer": { proteinPer100g: 18, caloriesPer100g: 296 },
+      "milk": { proteinPer100g: 3.4, caloriesPer100g: 64 },
+      "dal": { proteinPer100g: 9, caloriesPer100g: 116 },
+      "dal cooked": { proteinPer100g: 9, caloriesPer100g: 116 },
+      "roti": { proteinPer100g: 9, caloriesPer100g: 250, weightPerPiece: 40 },
+      "chapati": { proteinPer100g: 9, caloriesPer100g: 250, weightPerPiece: 40 },
+      "banana": { proteinPer100g: 1.1, caloriesPer100g: 89, weightPerPiece: 118 }
+    };
+
+    const foodError = document.getElementById("food-error");
+    const foodBtn = document.getElementById("food-btn");
+    const foodOutputMain = document.getElementById("food-output-main");
+    const foodOutputExtra = document.getElementById("food-output-extra");
+
+    foodBtn.addEventListener("click", function () {
+      foodError.style.display = "none";
+
+      const rawName = (document.getElementById("food-name").value || "").trim().toLowerCase();
+      const amount = parseFloat(document.getElementById("food-amount").value);
+      const unit = document.getElementById("food-unit").value;
+
+      if (!rawName) {
+        foodError.textContent = "Please enter a food name (e.g. egg, paneer, rice cooked).";
+        foodError.style.display = "block";
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        foodError.textContent = "Please enter a valid amount.";
+        foodError.style.display = "block";
+        return;
+      }
+
+      const food = FOOD_DB[rawName];
+      if (!food) {
+        foodError.textContent = "Food not found in mini database. Try something like egg, rice, roti, paneer.";
+        foodError.style.display = "block";
+        return;
+      }
+
+      let grams;
+      if (unit === "g") {
+        grams = amount;
+      } else {
+        // piece(s)
+        if (!food.weightPerPiece) {
+          foodError.textContent = "For this food, please use grams instead of pieces.";
+          foodError.style.display = "block";
+          return;
+        }
+        grams = amount * food.weightPerPiece;
+      }
+
+      const factor = grams / 100;
+      const protein = food.proteinPer100g * factor;
+      const calories = food.caloriesPer100g * factor;
+
+      const prettyName = rawName
+        .split(" ")
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+      foodOutputMain.innerHTML =
+        `<span class="goal-tag">Food</span>` +
+        `${amount} ${unit === "g" ? "g" : "piece(s)"} of <span class="goal-value">${prettyName}</span> has approximately ` +
+        `<span class="goal-value">${protein.toFixed(1)} g</span> protein and ` +
+        `<span class="goal-value">${Math.round(calories)} kcal</span>.`;
+
+      foodOutputExtra.innerHTML = "";
+
+      const infoPieces = [];
+
+      if (unit === "piece" && food.weightPerPiece) {
+        infoPieces.push(
+          `${amount} piece(s) ≈ ${Math.round(grams)} g`
+        );
+      } else {
+        infoPieces.push(`${Math.round(grams)} g portion`);
+      }
+
+      infoPieces.push(
+        `Per 100 g: ~${food.proteinPer100g} g protein, ${food.caloriesPer100g} kcal`
+      );
+
+      infoPieces.forEach(text => {
+        const div = document.createElement("div");
+        div.className = "pill";
+        div.textContent = text;
+        foodOutputExtra.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
